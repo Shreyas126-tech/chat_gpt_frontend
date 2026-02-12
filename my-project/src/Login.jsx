@@ -1,12 +1,64 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 function Login() {
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.id]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('access_token', data.access_token);
+                navigate('/dashboard');
+            } else {
+                setError(data.detail || 'Login failed. Please check your credentials.');
+            }
+        } catch (err) {
+            setError('An error occurred. Please check your connection.');
+            console.error('Login error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
-                <form>
+
+                {error && (
+                    <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
+                        <p>{error}</p>
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                             Email
@@ -16,6 +68,9 @@ function Login() {
                             id="email"
                             type="email"
                             placeholder="Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
                         />
                     </div>
                     <div className="mb-6">
@@ -27,14 +82,18 @@ function Login() {
                             id="password"
                             type="password"
                             placeholder="******************"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
                         />
                     </div>
                     <div className="flex items-center justify-between">
                         <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                            type="button"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:opacity-50"
+                            type="submit"
+                            disabled={loading}
                         >
-                            Sign In
+                            {loading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </div>
                     <div className="mt-4 text-center">

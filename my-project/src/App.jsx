@@ -7,6 +7,8 @@ import Header from './assets/Header'
 import Footer from './assets/Footer'
 import Signup from './Signup'
 import Login from './Login'
+import Dashboard from './pages/Dashboard'
+
 function App() {
   return (
     <Router>
@@ -17,6 +19,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
       <Footer />
     </Router>
